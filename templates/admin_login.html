@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Student Services Platform</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -19,182 +18,73 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
         }
 
         .login-container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
-            position: relative;
         }
 
         .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px 30px;
             text-align: center;
-            position: relative;
-        }
-
-        .login-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+            margin-bottom: 2rem;
         }
 
         .login-header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
         }
 
         .login-header p {
-            opacity: 0.9;
-            font-size: 16px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-icon i {
-            font-size: 36px;
-            color: white;
-        }
-
-        .login-form {
-            padding: 40px 30px;
+            color: #666;
+            font-size: 0.9rem;
         }
 
         .form-group {
-            margin-bottom: 25px;
-            position: relative;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             color: #333;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 500;
         }
 
         .form-group input {
             width: 100%;
-            padding: 15px 20px;
+            padding: 0.75rem;
             border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group.has-icon input {
-            padding-left: 50px;
-        }
-
-        .form-group .input-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            font-size: 18px;
-            margin-top: 12px;
-        }
-
-        .captcha-container {
-            background: #f8f9fa;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .captcha-question {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-
-        .captcha-input {
-            width: 120px !important;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 auto;
-        }
-
-        .captcha-refresh {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            text-decoration: underline;
-        }
-
-        .captcha-refresh:hover {
-            color: #5a6fd8;
         }
 
         .login-button {
             width: 100%;
-            padding: 15px;
+            padding: 0.75rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transition: transform 0.2s ease;
         }
 
         .login-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .login-button:active {
-            transform: translateY(0);
         }
 
         .login-button:disabled {
@@ -203,19 +93,38 @@
             transform: none;
         }
 
-        .login-button .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #c33;
         }
 
-        .login-button.loading .spinner {
-            display: inline-block;
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3c3;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -223,237 +132,71 @@
             100% { transform: rotate(360deg); }
         }
 
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert.warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .alert.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .security-info {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #1565c0;
-        }
-
-        .security-info i {
-            margin-right: 8px;
-            color: #1976d2;
-        }
-
-        .rate-limit-info {
-            background: #fff3e0;
-            border: 1px solid #ffcc02;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #e65100;
+        .footer {
             text-align: center;
-        }
-
-        .rate-limit-info i {
-            margin-right: 8px;
-            font-size: 16px;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                margin: 10px;
-                border-radius: 15px;
-            }
-
-            .login-header {
-                padding: 30px 20px 20px;
-            }
-
-            .login-header h1 {
-                font-size: 24px;
-            }
-
-            .login-form {
-                padding: 30px 20px;
-            }
-
-            .form-group input {
-                padding: 12px 15px;
-                font-size: 16px;
-            }
-
-            .form-group.has-icon input {
-                padding-left: 45px;
-            }
-
-            .form-group .input-icon {
-                left: 15px;
-                font-size: 16px;
-            }
-        }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            .login-container {
-                background: #1a1a1a;
-                color: #e0e0e0;
-            }
-
-            .form-group input {
-                background: #2d2d2d;
-                border-color: #404040;
-                color: #e0e0e0;
-            }
-
-            .form-group input:focus {
-                background: #333;
-                border-color: #667eea;
-            }
-
-            .captcha-container {
-                background: #2d2d2d;
-                border-color: #404040;
-            }
-
-            .captcha-question {
-                background: #333;
-                border-color: #404040;
-                color: #e0e0e0;
-            }
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <div class="login-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
             <h1>Admin Login</h1>
             <p>Student Services Platform</p>
         </div>
 
-        <div class="login-form">
-            <div id="alert" class="alert"></div>
+        <div id="message-container"></div>
 
-            {% if rate_limited %}
-            <div class="rate-limit-info">
-                <i class="fas fa-clock"></i>
-                Too many failed attempts. Please wait {{ lockout_time }} seconds before trying again.
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
             </div>
-            {% endif %}
 
-            <form id="loginForm" method="post" action="/admin/login">
-                <div class="form-group has-icon">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required autocomplete="username">
-                    <i class="fas fa-user input-icon"></i>
-                </div>
-
-                <div class="form-group has-icon">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
-                    <i class="fas fa-lock input-icon"></i>
-                </div>
-
-                <div class="captcha-container">
-                    <div class="captcha-question" id="captchaQuestion">
-                        Loading CAPTCHA...
-                    </div>
-                    <input type="text" id="captchaAnswer" name="captcha_answer" class="captcha-input" placeholder="Answer" required autocomplete="off">
-                    <input type="hidden" id="captchaToken" name="captcha_token">
-                    <button type="button" class="captcha-refresh" onclick="refreshCaptcha()">
-                        <i class="fas fa-refresh"></i> New CAPTCHA
-                    </button>
-                </div>
-
-                <button type="submit" class="login-button" id="loginButton" {% if rate_limited %}disabled{% endif %}>
-                    <span class="spinner"></span>
-                    <span class="button-text">Sign In</span>
-                </button>
-            </form>
-
-            <div class="security-info">
-                <i class="fas fa-info-circle"></i>
-                This is a secure admin area. All login attempts are monitored and logged.
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
             </div>
+
+            <button type="submit" class="login-button" id="loginButton">
+                Login
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Logging in...</p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 Student Services Platform</p>
         </div>
     </div>
 
     <script>
-        // CAPTCHA management
-        let captchaData = null;
-
-        async function loadCaptcha() {
-            try {
-                const response = await fetch('/admin/captcha');
-                captchaData = await response.json();
-                
-                document.getElementById('captchaQuestion').textContent = captchaData.question;
-                document.getElementById('captchaToken').value = captchaData.token;
-                document.getElementById('captchaAnswer').value = '';
-                document.getElementById('captchaAnswer').focus();
-            } catch (error) {
-                console.error('Failed to load CAPTCHA:', error);
-                showAlert('Failed to load CAPTCHA. Please refresh the page.', 'error');
-            }
-        }
-
-        function refreshCaptcha() {
-            loadCaptcha();
-        }
-
-        // Form submission
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const button = document.getElementById('loginButton');
-            const buttonText = button.querySelector('.button-text');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginButton = document.getElementById('loginButton');
+            const loading = document.getElementById('loading');
+            const messageContainer = document.getElementById('message-container');
             
-            // Disable button and show loading
-            button.disabled = true;
-            button.classList.add('loading');
-            buttonText.textContent = 'Signing In...';
+            // Clear previous messages
+            messageContainer.innerHTML = '';
+            
+            // Show loading state
+            loginButton.disabled = true;
+            loading.style.display = 'block';
             
             try {
-                const formData = new FormData(this);
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+                
                 const response = await fetch('/admin/login', {
                     method: 'POST',
                     body: formData
@@ -462,91 +205,31 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    showAlert('Login successful! Redirecting...', 'success');
+                    // Success
+                    messageContainer.innerHTML = '<div class="success-message">Login successful! Redirecting...</div>';
                     setTimeout(() => {
-                        window.location.href = '/admin';
+                        window.location.href = result.redirect || '/admin';
                     }, 1000);
                 } else {
-                    showAlert(result.detail || 'Login failed. Please try again.', 'error');
-                    
-                    // Refresh CAPTCHA on failed attempt
-                    refreshCaptcha();
-                    
-                    // Check for rate limiting
-                    if (result.rate_limited) {
-                        button.disabled = true;
-                        buttonText.textContent = `Wait ${result.lockout_time}s`;
-                        
-                        // Countdown timer
-                        let countdown = result.lockout_time;
-                        const timer = setInterval(() => {
-                            countdown--;
-                            buttonText.textContent = `Wait ${countdown}s`;
-                            
-                            if (countdown <= 0) {
-                                clearInterval(timer);
-                                button.disabled = false;
-                                button.classList.remove('loading');
-                                buttonText.textContent = 'Sign In';
-                            }
-                        }, 1000);
-                    } else {
-                        // Re-enable button
-                        button.disabled = false;
-                        button.classList.remove('loading');
-                        buttonText.textContent = 'Sign In';
-                    }
+                    // Error
+                    messageContainer.innerHTML = `<div class="error-message">${result.detail}</div>`;
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert('Network error. Please check your connection and try again.', 'error');
-                
-                // Re-enable button
-                button.disabled = false;
-                button.classList.remove('loading');
-                buttonText.textContent = 'Sign In';
+                messageContainer.innerHTML = '<div class="error-message">An error occurred. Please try again.</div>';
+            } finally {
+                // Hide loading state
+                loginButton.disabled = false;
+                loading.style.display = 'none';
             }
         });
 
-        // Alert system
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = `alert ${type} show`;
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                alert.classList.remove('show');
-            }, 5000);
-        }
-
-        // Auto-focus username field
-        document.addEventListener('DOMContentLoaded', function() {
-            const usernameField = document.getElementById('username');
-            if (usernameField && !usernameField.value) {
-                usernameField.focus();
-            }
-            
-            // Load initial CAPTCHA
-            loadCaptcha();
-        });
-
-        // Handle Enter key in CAPTCHA field
-        document.getElementById('captchaAnswer').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-            }
-        });
-
-        // Security: Clear form on page unload
-        window.addEventListener('beforeunload', function() {
-            document.getElementById('password').value = '';
-            document.getElementById('captchaAnswer').value = '';
-        });
-
-        // Prevent form resubmission on page refresh
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
+        // Show error message if passed in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        if (error) {
+            document.getElementById('message-container').innerHTML = 
+                `<div class="error-message">${decodeURIComponent(error)}</div>`;
         }
     </script>
 </body>

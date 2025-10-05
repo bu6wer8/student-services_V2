@@ -1,0 +1,47 @@
+# Student Services Platform - Simplified Requirements
+# Minimal dependencies for basic functionality
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+
+# Environment and Configuration
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# Templates and Static Files
+jinja2==3.1.2
+python-multipart==0.0.6
+
+# Basic Authentication (simplified)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# HTTP Client
+httpx==0.25.2
+requests==2.31.0
+
+# Telegram Bot (optional)
+python-telegram-bot==20.7
+
+# Payment Processing (optional)
+stripe==7.8.0
+
+# Email (optional)
+aiosmtplib==3.0.1
+
+# File Handling
+python-magic==0.4.27
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Development
+pytest==7.4.3
+pytest-asyncio==0.21.1

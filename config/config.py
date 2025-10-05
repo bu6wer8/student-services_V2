@@ -1,50 +1,45 @@
 #!/usr/bin/env python3
 """
-Student Services Platform - Enhanced Configuration
-Production-ready configuration with security settings
+Student Services Platform - Simplified Configuration
+Basic configuration with minimal required settings
 """
 
 import os
 from typing import Optional
-from pydantic import BaseSettings, validator
-from pydantic_settings import BaseSettings as PydanticBaseSettings
+from pydantic_settings import BaseSettings
 
-class Settings(PydanticBaseSettings):
+class Settings(BaseSettings):
     """
-    Application settings with validation and security
+    Simplified application settings
     """
     
     # Environment
-    env: str = "production"
-    debug: bool = False
-    app_url: str = "https://yourdomain.com"
+    env: str = "development"
+    debug: bool = True
+    app_url: str = "http://localhost:8000"
     
     # Database
-    database_url: str
-    redis_url: str = "redis://localhost:6379"
+    database_url: str = "sqlite:///./student_services.db"
     
     # API Configuration
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    secret_key: str
-    algorithm: str = "HS256"
+    secret_key: str = "your-secret-key-change-this-in-production-make-it-at-least-32-characters-long"
     
     # Admin Authentication
     admin_username: str = "admin"
-    admin_password: str = "admin123"  # Change this!
-    admin_password_hash: Optional[str] = None
-    admin_token: Optional[str] = None
+    admin_password: str = "admin123"
     
-    # Telegram Bot
+    # Telegram Bot (optional)
     telegram_bot_token: str = ""
     telegram_admin_id: str = ""
     
-    # Payment - Stripe
+    # Payment - Stripe (optional)
     stripe_public_key: str = ""
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
     
-    # Email Configuration
+    # Email Configuration (optional)
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = ""
@@ -55,7 +50,7 @@ class Settings(PydanticBaseSettings):
     download_dir: str = "./static/downloads"
     max_file_size: int = 10485760  # 10MB
     
-    # Bank Transfer Details
+    # Bank Transfer Details (optional)
     bank_name: str = "Your Bank"
     bank_account_name: str = "Your Company"
     bank_account_number: str = ""
@@ -91,53 +86,12 @@ class Settings(PydanticBaseSettings):
     support_email: str = "support@yourdomain.com"
     support_telegram: str = "@your_support"
     
-    # Security Configuration
-    access_token_expire_minutes: int = 30
-    password_hash_algorithm: str = "bcrypt"
-    
-    # Logging Configuration
-    log_level: str = "INFO"
-    log_file: str = "logs/app.log"
-    log_max_size: int = 10485760
-    log_backup_count: int = 5
-    
-    # Cache Configuration
-    cache_ttl: int = 3600
-    cache_prefix: str = "student_services"
-    
-    # Rate Limiting
-    rate_limit_per_minute: int = 60
-    rate_limit_per_hour: int = 1000
-    
     # Feature Flags
     enable_registration: bool = True
     enable_bank_transfer: bool = True
-    enable_stripe: bool = True
-    enable_email_notifications: bool = True
+    enable_stripe: bool = False
+    enable_email_notifications: bool = False
     enable_sms_notifications: bool = False
-    
-    # Development Settings
-    dev_database_url: str = "sqlite:///./dev_student_services.db"
-    dev_skip_auth: bool = False
-    dev_mock_payments: bool = False
-    
-    @validator('secret_key')
-    def validate_secret_key(cls, v):
-        if len(v) < 32:
-            raise ValueError('Secret key must be at least 32 characters long')
-        return v
-    
-    @validator('admin_password')
-    def validate_admin_password(cls, v):
-        if len(v) < 8:
-            raise ValueError('Admin password must be at least 8 characters long')
-        return v
-    
-    @validator('database_url')
-    def validate_database_url(cls, v):
-        if not v:
-            raise ValueError('Database URL is required')
-        return v
     
     def get_payment_methods(self):
         """
@@ -261,10 +215,3 @@ class Settings(PydanticBaseSettings):
 
 # Create settings instance
 settings = Settings()
-
-# Validate critical settings
-if not settings.secret_key:
-    raise ValueError("SECRET_KEY environment variable is required")
-
-if not settings.database_url:
-    raise ValueError("DATABASE_URL environment variable is required")

@@ -36,7 +36,7 @@ prompt_input() {
     local prompt="$1"
     local default="$2"
     local var_name="$3"
-
+    
     if [ -n "$default" ]; then
         read -p "$prompt [$default]: " input
         if [ -z "$input" ]; then
@@ -49,7 +49,7 @@ prompt_input() {
             read -p "$prompt: " input
         done
     fi
-
+    
     eval "$var_name='$input'"
 }
 
@@ -57,7 +57,7 @@ prompt_input() {
 prompt_password() {
     local prompt="$1"
     local var_name="$2"
-
+    
     read -s -p "$prompt: " input
     echo
     while [ -z "$input" ]; do
@@ -65,7 +65,7 @@ prompt_password() {
         read -s -p "$prompt: " input
         echo
     done
-
+    
     eval "$var_name='$input'"
 }
 
@@ -85,32 +85,53 @@ check_root() {
     fi
 }
 
-# Check system requirements (only essential tools)
+# Check system requirements
 check_requirements() {
     print_header "Checking System Requirements"
-
+    
+    # Check Python
+    if ! command -v python3 &> /dev/null; then
+        print_error "Python 3 is not installed"
+        exit 1
+    fi
+    
+    python_version=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1-2)
+    if [ "$(printf '%s\n' "3.8" "$python_version" | sort -V | head -n1)" != "3.8" ]; then
+        print_error "Python 3.8 or higher is required"
+        exit 1
+    fi
+    
+    print_status "Python $python_version found"
+    
+    # Check pip
+    if ! command -v pip3 &> /dev/null; then
+        print_error "pip3 is not installed"
+        exit 1
+    fi
+    
     # Check git
     if ! command -v git &> /dev/null; then
         print_error "git is not installed"
         exit 1
     fi
-
+    
     print_status "All requirements satisfied"
 }
 
-# Install system dependencies (skip Python installation)
+# Install system dependencies
 install_system_deps() {
     print_header "Installing System Dependencies"
-
+    
     if command -v apt-get &> /dev/null; then
         # Ubuntu/Debian
         sudo apt-get update
-        sudo apt-get install -y postgresql postgresql-contrib nginx redis-server supervisor
+        sudo apt-get install -y python3-venv python3-pip postgresql postgresql-contrib nginx redis-server supervisor
     elif command -v yum &> /dev/null; then
         # CentOS/RHEL
-        sudo yum install -y postgresql postgresql-server nginx redis supervisor
+        sudo yum install -y python3-venv python3-pip postgresql postgresql-server nginx redis supervisor
     else
         print_warning "Unknown package manager. Please install dependencies manually:"
+        print_warning "- Python 3.8+"
         print_warning "- PostgreSQL"
         print_warning "- Nginx"
         print_warning "- Redis"
@@ -118,18 +139,42 @@ install_system_deps() {
     fi
 }
 
+# Setup Python virtual environment
+setup_venv() {
+    print_header "Setting up Python Virtual Environment"
+    
+    if [ -d "venv" ]; then
+        print_warning "Virtual environment already exists"
+        read -p "Remove and recreate? (y/N): " recreate_venv
+        if [ "$recreate_venv" = "y" ] || [ "$recreate_venv" = "Y" ]; then
+            rm -rf venv
+        else
+            return
+        fi
+    fi
+    
+    python3 -m venv venv
+    source venv/bin/activate
+    
+    print_status "Installing Python packages..."
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    
+    print_status "Virtual environment created successfully"
+}
+
 # Collect configuration
 collect_config() {
     print_header "Configuration Setup"
-
+    
     echo "Please provide the following configuration details:"
     echo
-
+    
     # Basic settings
     prompt_input "Environment (development/production)" "production" ENV
     prompt_input "Debug mode (true/false)" "false" DEBUG
     prompt_input "Application URL" "https://yourdomain.com" APP_URL
-
+    
     echo
     print_status "Database Configuration"
     prompt_input "Database host" "localhost" DB_HOST
@@ -137,30 +182,30 @@ collect_config() {
     prompt_input "Database name" "student_services" DB_NAME
     prompt_input "Database user" "student_services" DB_USER
     prompt_password "Database password" DB_PASSWORD
-
+    
     echo
     print_status "Telegram Bot Configuration"
     prompt_input "Telegram Bot Token (from @BotFather)" "" TELEGRAM_BOT_TOKEN
     prompt_input "Telegram Admin ID (your user ID)" "" TELEGRAM_ADMIN_ID
-
+    
     echo
     print_status "Stripe Payment Configuration"
     prompt_input "Stripe Public Key" "" STRIPE_PUBLIC_KEY
     prompt_input "Stripe Secret Key" "" STRIPE_SECRET_KEY
     prompt_input "Stripe Webhook Secret" "" STRIPE_WEBHOOK_SECRET
-
+    
     echo
     print_status "Email Configuration (Optional)"
     prompt_input "SMTP Host" "smtp.gmail.com" SMTP_HOST
     prompt_input "SMTP Port" "587" SMTP_PORT
     prompt_input "SMTP User" "" SMTP_USER
     prompt_password "SMTP Password" SMTP_PASSWORD
-
+    
     echo
     print_status "Security Configuration"
     SECRET_KEY=$(generate_random)
     print_status "Generated secret key: ${SECRET_KEY:0:16}..."
-
+    
     echo
     print_status "Bank Transfer Details"
     prompt_input "Bank Name" "Your Bank" BANK_NAME
@@ -173,7 +218,7 @@ collect_config() {
 # Create .env file
 create_env_file() {
     print_header "Creating Environment File"
-
+    
     cat > .env << EOF
 # Environment Configuration
 ENV=$ENV
@@ -240,14 +285,14 @@ EOF
 # Setup database
 setup_database() {
     print_header "Setting up Database"
-
+    
     # Check if PostgreSQL is running
     if ! systemctl is-active --quiet postgresql; then
         print_status "Starting PostgreSQL..."
         sudo systemctl start postgresql
         sudo systemctl enable postgresql
     fi
-
+    
     # Create database and user
     print_status "Creating database and user..."
     sudo -u postgres psql << EOF
@@ -257,20 +302,25 @@ GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
 ALTER USER $DB_USER CREATEDB;
 \q
 EOF
-
+    
+    # Initialize database tables
+    print_status "Initializing database tables..."
+    source venv/bin/activate
+    python scripts/init_db.py
+    
     print_status "Database setup completed"
 }
 
 # Setup Nginx
 setup_nginx() {
     print_header "Setting up Nginx"
-
+    
     # Create Nginx configuration
     sudo tee /etc/nginx/sites-available/student-services << EOF
 server {
     listen 80;
     server_name $APP_URL;
-
+    
     # Redirect HTTP to HTTPS
     return 301 https://\$server_name\$request_uri;
 }
@@ -278,10 +328,14 @@ server {
 server {
     listen 443 ssl http2;
     server_name $APP_URL;
-
-    # SSL Configuration (comment out SSL for now)
+    
+    # SSL Configuration (you'll need to add your certificates)
+    # ssl_certificate /path/to/your/certificate.crt;
+    # ssl_certificate_key /path/to/your/private.key;
+    
+    # For now, comment out SSL and use HTTP only
     listen 80;
-
+    
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host \$host;
@@ -289,13 +343,13 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
-
+    
     location /static/ {
         alias $(pwd)/static/;
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
-
+    
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-XSS-Protection "1; mode=block" always;
@@ -304,25 +358,25 @@ server {
     add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
 }
 EOF
-
+    
     # Enable site
     sudo ln -sf /etc/nginx/sites-available/student-services /etc/nginx/sites-enabled/
     sudo rm -f /etc/nginx/sites-enabled/default
-
+    
     # Test Nginx configuration
     sudo nginx -t
-
+    
     # Restart Nginx
     sudo systemctl restart nginx
     sudo systemctl enable nginx
-
+    
     print_status "Nginx configured successfully"
 }
 
 # Setup systemd services
 setup_services() {
     print_header "Setting up System Services"
-
+    
     # Web application service
     sudo tee /etc/systemd/system/student-services-web.service << EOF
 [Unit]
@@ -341,7 +395,7 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOF
-
+    
     # Telegram bot service
     sudo tee /etc/systemd/system/student-services-bot.service << EOF
 [Unit]
@@ -360,35 +414,133 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOF
-
+    
     # Reload systemd and enable services
     sudo systemctl daemon-reload
     sudo systemctl enable student-services-web
     sudo systemctl enable student-services-bot
-
+    
     print_status "System services created"
 }
 
 # Start services
 start_services() {
     print_header "Starting Services"
-
+    
     # Start Redis
     sudo systemctl start redis-server
     sudo systemctl enable redis-server
-
+    
     # Start web application
     sudo systemctl start student-services-web
-
+    
     # Start bot
     sudo systemctl start student-services-bot
-
+    
     # Check service status
     print_status "Service Status:"
     sudo systemctl status student-services-web --no-pager -l
     sudo systemctl status student-services-bot --no-pager -l
-
+    
     print_status "All services started"
+}
+
+# Setup SSL (optional)
+setup_ssl() {
+    print_header "SSL Certificate Setup"
+    
+    read -p "Do you want to set up SSL with Let's Encrypt? (y/N): " setup_ssl_choice
+    
+    if [ "$setup_ssl_choice" = "y" ] || [ "$setup_ssl_choice" = "Y" ]; then
+        # Install certbot
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get install -y certbot python3-certbot-nginx
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y certbot python3-certbot-nginx
+        fi
+        
+        # Get certificate
+        sudo certbot --nginx -d $APP_URL
+        
+        print_status "SSL certificate installed"
+    else
+        print_warning "SSL setup skipped. You can set it up later with: sudo certbot --nginx -d $APP_URL"
+    fi
+}
+
+# Create backup script
+create_backup_script() {
+    print_header "Creating Backup Script"
+    
+    cat > scripts/backup.sh << 'EOF'
+#!/bin/bash
+
+# Student Services Platform Backup Script
+
+BACKUP_DIR="/var/backups/student-services"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Create backup directory
+mkdir -p $BACKUP_DIR
+
+# Backup database
+pg_dump student_services > $BACKUP_DIR/database_$DATE.sql
+
+# Backup uploaded files
+tar -czf $BACKUP_DIR/files_$DATE.tar.gz static/uploads uploaded_works
+
+# Backup configuration
+cp .env $BACKUP_DIR/env_$DATE.backup
+
+# Remove old backups (keep last 7 days)
+find $BACKUP_DIR -name "*.sql" -mtime +7 -delete
+find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
+find $BACKUP_DIR -name "*.backup" -mtime +7 -delete
+
+echo "Backup completed: $BACKUP_DIR"
+EOF
+    
+    chmod +x scripts/backup.sh
+    
+    # Add to crontab
+    (crontab -l 2>/dev/null; echo "0 2 * * * $(pwd)/scripts/backup.sh") | crontab -
+    
+    print_status "Backup script created and scheduled"
+}
+
+# Final setup
+final_setup() {
+    print_header "Final Setup"
+    
+    # Create necessary directories
+    mkdir -p logs static/uploads static/downloads uploaded_works
+    
+    # Set permissions
+    chmod 755 static/uploads static/downloads uploaded_works
+    
+    # Create admin user (optional)
+    read -p "Create admin user? (y/N): " create_admin
+    if [ "$create_admin" = "y" ] || [ "$create_admin" = "Y" ]; then
+        source venv/bin/activate
+        python -c "
+from app.models.database import get_db
+from app.models.models import User
+from datetime import datetime
+
+db = next(get_db())
+admin = User(
+    telegram_id='$TELEGRAM_ADMIN_ID',
+    full_name='Admin User',
+    is_admin=True,
+    created_at=datetime.utcnow()
+)
+db.add(admin)
+db.commit()
+print('Admin user created')
+"
+    fi
+    
+    print_status "Final setup completed"
 }
 
 # Main installation function
@@ -396,32 +548,62 @@ main() {
     print_header "Student Services Platform Setup"
     echo "This script will set up the complete Student Services Platform"
     echo
-
+    
     read -p "Continue with installation? (y/N): " continue_install
     if [ "$continue_install" != "y" ] && [ "$continue_install" != "Y" ]; then
         echo "Installation cancelled"
         exit 0
     fi
-
+    
     check_root
     check_requirements
-
+    
     read -p "Install system dependencies? (y/N): " install_deps
     if [ "$install_deps" = "y" ] || [ "$install_deps" = "Y" ]; then
         install_system_deps
     fi
-
+    
+    setup_venv
     collect_config
     create_env_file
     setup_database
-    setup_nginx
+    
+    read -p "Setup Nginx web server? (y/N): " setup_nginx_choice
+    if [ "$setup_nginx_choice" = "y" ] || [ "$setup_nginx_choice" = "Y" ]; then
+        setup_nginx
+        setup_ssl
+    fi
+    
     setup_services
     start_services
-
+    create_backup_script
+    final_setup
+    
     print_header "Installation Complete!"
+    echo
     print_status "Your Student Services Platform is now running!"
     print_status "Web interface: http://$APP_URL"
     print_status "Admin panel: http://$APP_URL/admin"
+    echo
+    print_status "Service management commands:"
+    echo "  sudo systemctl status student-services-web"
+    echo "  sudo systemctl status student-services-bot"
+    echo "  sudo systemctl restart student-services-web"
+    echo "  sudo systemctl restart student-services-bot"
+    echo
+    print_status "Logs location:"
+    echo "  Application: $(pwd)/logs/"
+    echo "  System: sudo journalctl -u student-services-web -f"
+    echo "  System: sudo journalctl -u student-services-bot -f"
+    echo
+    print_warning "Next steps:"
+    echo "1. Test your Telegram bot by messaging it"
+    echo "2. Configure your domain DNS to point to this server"
+    echo "3. Set up SSL certificate if not done already"
+    echo "4. Configure Stripe webhook URL in your Stripe dashboard"
+    echo "5. Test the complete order flow"
+    echo
+    print_status "Setup completed successfully!"
 }
 
 # Run main function
